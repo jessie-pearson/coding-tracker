@@ -1,1 +1,9 @@
-﻿Console.WriteLine("Hello World")
+﻿using Microsoft.Extensions.Configuration;
+
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json")
+    .Build();
+    
+    
+var connectionString = configuration["ConnectionString"];
