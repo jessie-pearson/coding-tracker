@@ -14,5 +14,6 @@ if (connectionString is null)
 
 var db = new DatabaseController(connectionString);
 db.Initialise();
+UserInterface.Menu(db);
 
 return 0;
