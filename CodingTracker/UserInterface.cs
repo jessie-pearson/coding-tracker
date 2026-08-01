@@ -3,9 +3,11 @@ using Spectre.Console;
 
 namespace CodingTracker;
 
+internal record struct SelectionOption(int Id, string Msg);
+
 internal static class UserInterface
 {
-    private static void LogTable (params CodingSession[] codingSessions)
+    private static void ConsoleTable (params CodingSession[] codingSessions)
     {
         var table = new Table()
             .AddColumn("ID")
@@ -25,61 +27,68 @@ internal static class UserInterface
 
         AnsiConsole.Write(table);
     }
+
+    internal static SelectionOption ConsoleSelection(string title, SelectionOption[] options)
+    {
+        var selectionPrompt = new SelectionPrompt<SelectionOption>()
+            .Title($"[green][bold]{title}[/][/]")
+            .UseConverter(o => $"[bold]{o.Id}[/] - {o.Msg}")
+            .WrapAround()
+            .AddChoices(options);
+
+        return AnsiConsole.Prompt(selectionPrompt);
+    }
     
     internal static void Menu(DatabaseController db)
     {
+        var options = new[]
+        {
+            new SelectionOption {Id = 1, Msg = "Add a coding session"},
+            new SelectionOption {Id = 2, Msg = "View your coding sessions"},
+            new SelectionOption {Id = 3, Msg = "Update a coding session"},
+            new SelectionOption {Id = 4, Msg = "Delete a coding session"},
+            new SelectionOption {Id = 5, Msg = "Exit the program"},
+        };
+        
         while (true)
         {
-            const string message = """
-                                   CODING SESSION TRACKER
-                                   ______________________________
-                                   Enter an option from the menu:
-                                    1. Add a coding session,
-                                    2. View your coding sessions,
-                                    3. Update a coding session,
-                                    4. Delete a coding session,
-                                    5. Exit the program
-                                   """;
-            
-            var option = Validate.GetValidInteger(message, 1, 5);
-            Console.Clear();
-            
-            switch (option)
+            var option = ConsoleSelection("CODING SESSION TRACKER", options);
+            switch (option.Id)
             {
                 case 1:
                     var codingSession = Handlers.Insert(db);
                     if (codingSession is not null)
                     {
-                        LogTable(codingSession);
+                        ConsoleTable(codingSession);
                     }
                     break;
                 case 2: 
                     var codingSessions = Handlers.Get(db);
                     if (codingSessions.Length > 0)
                     {
-                        LogTable(codingSessions);
+                        ConsoleTable(codingSessions);
                     }
                     break;
                 case 3:
                     var updatedCodingSession = Handlers.Update(db);
                     if (updatedCodingSession is not null)
                     {
-                        LogTable(updatedCodingSession);
+                        ConsoleTable(updatedCodingSession);
                     }
                     break;
                 case 4:
                     var deletedCodingSession = Handlers.Delete(db);
                     if (deletedCodingSession is not null)
                     {
-                        LogTable(deletedCodingSession);
+                        ConsoleTable(deletedCodingSession);
                     }
                     break;
                 case 5:
-                    Console.WriteLine("Goodbye!");
+                    AnsiConsole.MarkupLine("[green]Goodbye![/]");
                     return;
             }
 
-            Console.WriteLine("Press 'Enter' to continue");
+            AnsiConsole.MarkupLine("Press [blue]'Enter'[/] to continue");
             Console.ReadLine();
             Console.Clear();
         }

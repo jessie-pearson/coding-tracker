@@ -29,29 +29,30 @@ internal static class Handlers
     internal static CodingSession[] Get(DatabaseController db)
     {
         var filters = new CodingSessionFilters();
+        var dateOptions = new[]
+        {
+            new SelectionOption { Id = 1, Msg = "Add coding sessions" },
+            new SelectionOption { Id = 2, Msg = "Coding sessions after a date" },
+            new SelectionOption { Id = 3, Msg = "Coding sessions before a date" }
+        };
         
-        const string dateMessage = """
-                               Choose the coding sessions you want to view:
-                                1. All coding sessions,
-                                2. Coding sessions before a date,
-                                3. Coding sessions after a date.
-                               """;
-        var dateOption = Validate.GetValidInteger(dateMessage, 1, 3);
+        var dateOption = UserInterface.ConsoleSelection("Choose the coding sessions you want to view:", dateOptions);
         
-        if (dateOption is 2 or 3)
+        if (dateOption.Id is 2 or 3)
         {
             filters.Date = Validate.GetValidDateInput(
                 "Enter the date\nUse the following format: dd/mm/yy", DateFormat);
-            filters.DatePeriod = dateOption == 2 ? DatePeriod.Before : DatePeriod.After;
+            filters.DatePeriod = dateOption.Id == 2 ? DatePeriod.Before : DatePeriod.After;
         }
-        
-        const string orderByMessage = """
-                                      Choose the sort order:
-                                        1. Ascending
-                                        2. Descending
-                                      """;
-        var orderByOption = Validate.GetValidInteger(orderByMessage, 1, 2);
-        filters.OrderBy = orderByOption == 1 ? "ASC" : "DESC";
+
+        var orderByOptions = new[]
+        {
+            new SelectionOption { Id = 1, Msg = "Ascending" },
+            new SelectionOption { Id = 2, Msg = "Descending" }
+        };
+
+        var orderByOption = UserInterface.ConsoleSelection("Choose the sort order:", orderByOptions);
+        filters.OrderBy = orderByOption.Id == 1 ? "ASC" : "DESC";
 
         return db.GetCodingSessions(filters);
     }
