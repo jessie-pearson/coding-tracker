@@ -3,6 +3,7 @@ namespace CodingTracker;
 internal static class Handlers
 {
     private const string DateTimeFormat = "dd/MM/yy HH:mm";
+    private const string DateFormat = "dd/MM/yy";
     
     internal static CodingSession? Insert(DatabaseController db)
     {
@@ -40,7 +41,7 @@ internal static class Handlers
         if (dateOption is 2 or 3)
         {
             filters.Date = Validate.GetValidDateInput(
-                "Enter a date and or time\nUse the following format: dd/mm/yy hh:mm", DateTimeFormat);
+                "Enter the date\nUse the following format: dd/mm/yy", DateFormat);
             filters.DatePeriod = dateOption == 2 ? DatePeriod.Before : DatePeriod.After;
         }
         
